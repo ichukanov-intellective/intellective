@@ -1,48 +1,43 @@
 package main.java;
 
 import main.java.discount.DiscountRule;
-import main.java.discount.PersentDiscount;
-import main.java.discount.SumDiscount;
+import main.java.discount.DiscountTuple;
+import main.java.discount.PercentDiscountRule;
+import main.java.discount.SumDiscountRule;
 import main.java.model.Basket;
-import main.java.model.Item;
-import main.java.view.IPrinter;
-import main.java.view.Printer;
+import main.java.model.BasketItem;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Main {
     public static void main(String[] args) {
-       // -tool_1: 3 Х $7 = 21;
-       // -tool_2: 2 X $10 = 20;
-       // -tool_3: 100 X $0.01 = 1
-        Item tool1 = new Item("tool_1",new BigDecimal("7.0"));
-        Item tool2 = new Item("tool_2",new BigDecimal("10.0"));
-        Item tool3 = new Item("tool_3",new BigDecimal("0.01"));
+        // -tool_1: 3 Х $7 = 21;
+        // -tool_2: 2 X $10 = 20;
+        // -tool_3: 100 X $0.01 = 1
+        BasketItem tool1 = new BasketItem("tool_1", new BigDecimal("7.0"));
+        BasketItem tool2 = new BasketItem("tool_2", new BigDecimal("10.0"));
+        BasketItem tool3 = new BasketItem("tool_3", new BigDecimal("0.01"));
 
-        ArrayList<DiscountRule> discountRules = new ArrayList<>();
+        ArrayList<DiscountRule> discounts = new ArrayList<>();
 
-        HashMap<Item, Integer> persentDiscountItems = new HashMap<>();
-        persentDiscountItems.put(tool1,1);
-        persentDiscountItems.put(tool3,10);
         //create discount system 10% (there are 1 X tool_1 and 10 X tool_3)
-        DiscountRule persentDiscount = new PersentDiscount(persentDiscountItems,new BigDecimal(10));
-        discountRules.add(persentDiscount);
-
+        PercentDiscountRule percentDiscountRule = PercentDiscountRule.of(
+                new BigDecimal(10),
+                new DiscountTuple(tool1, 1),
+                new DiscountTuple(tool3, 10)
+        );
         //create discount system sum discount (there are 2 Х tool_2) -$5
-        HashMap<Item, Integer> sumDiscountItems = new HashMap<>();
-        sumDiscountItems.put(tool2,2);
-        DiscountRule sumDiscount = new SumDiscount(sumDiscountItems,new BigDecimal(5));
-        discountRules.add(sumDiscount);
+        DiscountRule sumDiscount = SumDiscountRule.of(
+                new BigDecimal(5),
+                new DiscountTuple(tool2, 2)
+        );
 
-        Basket basket = new Basket(discountRules);
-        basket.addItem(tool1,3);
-        basket.addItem(tool2,2);
-        basket.addItem(tool3,100);
-        basket.calculate();
+        discounts.add(percentDiscountRule);
+        discounts.add(sumDiscount);
 
-        IPrinter printer = new Printer();
-        printer.print(basket.getDescribe());
+        Basket basket = new Basket().put(tool1, 3).put(tool2, 2).put(tool3, 100);
+
+        System.out.println("Final price: " + basket.calculate(discounts));
     }
 }

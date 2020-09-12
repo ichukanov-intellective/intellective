@@ -1,11 +1,10 @@
 package main.java.discount;
 
-import main.java.model.Item;
+import main.java.model.BasketItem;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.List;
 
 public interface DiscountRule {
-    BigDecimal countDiscount(HashMap<Item, Integer> basketItems, BigDecimal preTotal);
-    String getDescribe();
+    BigDecimal apply(List<BasketItem> items, BigDecimal preTotal);
 }

@@ -4,84 +4,30 @@ import main.java.discount.DiscountRule;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 public class Basket {
-    private HashMap<Item, Integer> items = new HashMap<>();
-    private ArrayList<DiscountRule> discountRules = new ArrayList<>();
-    private BigDecimal preTotal;
-    private BigDecimal total;
+    private final List<BasketItem> items = new ArrayList<>();
 
-    public Basket(ArrayList<DiscountRule> discountRules) {
-        this.discountRules = discountRules;
-    }
-
-    public Basket() {
-    }
-
-    public HashMap<Item, Integer> getItems() {
-        return items;
-    }
-
-    public BigDecimal getPreTotal() {
-        return preTotal;
-    }
-
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public void addItem(Item item, int count) {
-        if (items.containsKey(item)) {
-            count = items.get(item) + count;
-        }
-        items.put(item, count);
-    }
-
-    public void calculate() {
-        preTotal = BigDecimal.ZERO;
-        Set<Map.Entry<Item, Integer>> set = items.entrySet();
-        for (Map.Entry<Item, Integer> entry : set) {
-            preTotal = preTotal.add(entry.getKey().getPrice().multiply(new BigDecimal(entry.getValue())));
+    public Basket put(BasketItem item, int count) {
+        for (int i = 0; i < count; i++) {
+            items.add(item);
         }
 
-        BigDecimal discountSum = BigDecimal.ZERO;
-        for (DiscountRule rule : discountRules) {
-            discountSum = discountSum.add(rule.countDiscount(items, preTotal));
-        }
-
-        total = preTotal.subtract(discountSum);
+        return this;
     }
 
-    public String getDescribe() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("basket:");
-        builder.append(System.getProperty("line.separator"));
-        Set<Map.Entry<Item, Integer>> set = items.entrySet();
-        for (Map.Entry<Item, Integer> entry : set) {
-            builder.append(entry.getKey().getName());
-            builder.append(": ");
-            builder.append(entry.getValue());
-            builder.append(" X ");
-            builder.append(entry.getKey().getPrice());
-            builder.append(" = ");
-            builder.append(entry.getKey().getPrice().multiply(new BigDecimal(entry.getValue())));
-            builder.append(";");
-            builder.append(System.getProperty("line.separator"));
-        }
-        builder.append("pre-total: $");
-        builder.append(preTotal);
+    public BigDecimal calculate(ArrayList<DiscountRule> rules) {
+        BigDecimal total = items.stream().map(BasketItem::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        for (DiscountRule rule : discountRules) {
-            builder.append(System.getProperty("line.separator"));
-            builder.append(rule.getDescribe());
-        }
+        return total.subtract(getDiscount(rules, total));
+    }
 
-        builder.append(System.getProperty("line.separator"));
-        builder.append("total: $");
-        builder.append(total);
-        return builder.toString();
+    private BigDecimal getDiscount(ArrayList<DiscountRule> rules, BigDecimal total) {
+        return rules.stream().reduce(
+                BigDecimal.ZERO,
+                (acc, rule) -> acc.add(rule.apply(items, total)),
+                BigDecimal::add
+        );
     }
 }
