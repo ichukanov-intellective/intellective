@@ -24,10 +24,8 @@ public class Basket {
     }
 
     private BigDecimal getDiscount(ArrayList<DiscountRule> rules, BigDecimal total) {
-        return rules.stream().reduce(
-                BigDecimal.ZERO,
-                (acc, rule) -> acc.add(rule.apply(items, total)),
-                BigDecimal::add
-        );
+        return rules.stream()
+                .filter(rule -> rule.test(items))
+                .reduce(BigDecimal.ZERO, (acc, rule) -> acc.add(rule.apply(total)), BigDecimal::add);
     }
 }

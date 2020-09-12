@@ -6,12 +6,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
 
 public class PercentDiscountRule implements DiscountRule {
     public static final BigDecimal ONE_HUNDRED = new BigDecimal(100);
@@ -29,20 +23,12 @@ public class PercentDiscountRule implements DiscountRule {
     }
 
     @Override
-    public BigDecimal apply(List<BasketItem> items, BigDecimal total) {
+    public BigDecimal apply(BigDecimal total) {
+        return percent.multiply(total.divide(ONE_HUNDRED, 2, RoundingMode.HALF_UP));
+    }
 
-        Map<BasketItem, Long> itemsByType = items.stream().collect(groupingBy(Function.identity(), counting()));
-
-        Predicate<DiscountTuple> predicate = (entry) ->
-                itemsByType.containsKey(entry.getItem()) &&
-                        itemsByType.get(entry.getItem()) >= entry.getCount();
-
-        boolean match = this.items.stream().allMatch(predicate);
-
-        if (match) {
-            return percent.multiply(total.divide(ONE_HUNDRED, 2, RoundingMode.HALF_UP));
-        }
-
-        return BigDecimal.ZERO;
+    @Override
+    public boolean test(List<BasketItem> items) {
+        return match(items, this.items);
     }
 }

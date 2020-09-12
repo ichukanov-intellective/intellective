@@ -5,11 +5,7 @@ import main.java.model.BasketItem;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
-import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 
 public class SumDiscountRule implements DiscountRule {
@@ -19,29 +15,22 @@ public class SumDiscountRule implements DiscountRule {
     }
 
     private final List<DiscountTuple> items;
-    private final BigDecimal discountCount;
 
-    private SumDiscountRule(List<DiscountTuple> items, BigDecimal discountCount) {
+    private final BigDecimal discount;
+
+    private SumDiscountRule(List<DiscountTuple> items, BigDecimal discount) {
         this.items = items;
 
-        this.discountCount = discountCount;
+        this.discount = discount;
     }
 
     @Override
-    public BigDecimal apply(List<BasketItem> items, BigDecimal total) {
+    public BigDecimal apply(BigDecimal total) {
+        return discount;
+    }
 
-        Map<BasketItem, Long> itemsByType = items.stream().collect(groupingBy(Function.identity(), counting()));
-
-        Predicate<DiscountTuple> predicate = (entry) ->
-                itemsByType.containsKey(entry.getItem()) &&
-                        itemsByType.get(entry.getItem()) >= entry.getCount();
-
-        boolean match = this.items.stream().allMatch(predicate);
-
-        if (match) {
-            return discountCount;
-        }
-
-        return BigDecimal.ZERO;
+    @Override
+    public boolean test(List<BasketItem> items) {
+        return match(items, this.items);
     }
 }
