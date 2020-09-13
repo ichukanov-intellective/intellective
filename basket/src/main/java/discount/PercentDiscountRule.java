@@ -29,6 +29,6 @@ public class PercentDiscountRule implements DiscountRule {
 
     @Override
     public boolean test(List<BasketItem> items) {
-        return match(items, this.items);
+        return DiscountRuleMatcher.match(items, this.items);
     }
 }

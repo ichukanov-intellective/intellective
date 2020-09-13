@@ -22,19 +22,21 @@ public class Main {
         ArrayList<DiscountRule> discounts = new ArrayList<>();
 
         //create discount system 10% (there are 1 X tool_1 and 10 X tool_3)
-        PercentDiscountRule percentDiscountRule = PercentDiscountRule.of(
-                new BigDecimal(10),
-                new DiscountTuple(tool1, 1),
-                new DiscountTuple(tool3, 10)
-        );
-        //create discount system sum discount (there are 2 Х tool_2) -$5
-        DiscountRule sumDiscount = SumDiscountRule.of(
-                new BigDecimal(5),
-                new DiscountTuple(tool2, 2)
+        discounts.add(
+                PercentDiscountRule.of(
+                        new BigDecimal(10),
+                        new DiscountTuple(tool1, 1),
+                        new DiscountTuple(tool3, 10)
+                )
         );
 
-        discounts.add(percentDiscountRule);
-        discounts.add(sumDiscount);
+        //create discount system sum discount (there are 2 Х tool_2) -$5
+        discounts.add(
+                SumDiscountRule.of(
+                        new BigDecimal(5),
+                        new DiscountTuple(tool2, 2)
+                )
+        );
 
         Basket basket = new Basket().put(tool1, 3).put(tool2, 2).put(tool3, 100);
 

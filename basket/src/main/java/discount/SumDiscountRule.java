@@ -6,8 +6,6 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
-import static java.util.stream.Collectors.groupingBy;
-
 public class SumDiscountRule implements DiscountRule {
 
     public static SumDiscountRule of(BigDecimal discount, DiscountTuple... items) {
@@ -31,6 +29,6 @@ public class SumDiscountRule implements DiscountRule {
 
     @Override
     public boolean test(List<BasketItem> items) {
-        return match(items, this.items);
+        return DiscountRuleMatcher.match(items, this.items);
     }
 }
